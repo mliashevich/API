@@ -30,10 +30,10 @@ func main() {
 }
 
 func getSession() *mgo.Session {
-	// Connect to our local mongo
 	s, err := mgo.Dial("mongodb://localhost:27017")
 
-	// Check if connection error, is mongo running?
+	s.SetMode(mgo.Strong, true)
+
 	if err != nil {
 		panic(err)
 	}
