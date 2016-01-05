@@ -7,6 +7,8 @@ import (
 	"gopkg.in/mgo.v2"
 
 	"github.com/gorilla/mux"
+
+	"net/http/fcgi"
 )
 
 type FastCGIServer struct{}
