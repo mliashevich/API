@@ -12,9 +12,14 @@ type (
 		Details        string        `json:"details" bson:"details"`
 		Location       string        `json:"location" bson:"location"`
 		StartDate      time.Time     `json:"start_time" bson:"start_time"`
-		AttendingCount int             `json:"attending_count" bson:"attending_count"`
-		MaxCount       int             `json:"max_count" bson:"max_count"`
+		PlacesLeft int           `json:"places_left" bson:"places_left"`
+		MaxCount   int           `json:"max_count" bson:"max_count"`
 		CreatedAt      time.Time     `json:"created_at" bson:"created_at"`
+	}
+
+	User struct {
+		Id   bson.ObjectId `json:"id" bson:"_id"`
+		Name string        `json:"name" bson:"name"`
 	}
 )
 

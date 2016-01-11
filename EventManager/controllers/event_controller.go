@@ -28,6 +28,7 @@ func NewEventsController(s *mgo.Session) *EventsController {
 /* Get all events */
 func (uc EventsController) GetEvents(resp http.ResponseWriter, req *http.Request) {
 
+
 	var allEvents []models.Event
 
 	if err := uc.session.DB("bsu_api").C("events").Find(nil).All(&allEvents); err != nil {
@@ -36,6 +37,8 @@ func (uc EventsController) GetEvents(resp http.ResponseWriter, req *http.Request
 	}
 
 	uj, _ := json.Marshal(allEvents)
+
+
 
 	resp.Header().Set("Content-Type", "application/json")
 	resp.WriteHeader(200)
@@ -69,10 +72,10 @@ func (uc EventsController) AddEvent(resp http.ResponseWriter, req *http.Request)
 	json.NewDecoder(req.Body).Decode(&u)
 
 	u.Id = bson.NewObjectId()
+	u.CreatedAt = time.Now()
+	u.PlacesLeft = u.MaxCount
 
 	uc.session.DB("bsu_api").C("events").Insert(u)
-
-	u.CreatedAt = time.Now()
 
 	uj, _ := json.Marshal(u)
 
@@ -82,25 +85,31 @@ func (uc EventsController) AddEvent(resp http.ResponseWriter, req *http.Request)
 	fmt.Fprintf(resp, "%s", uj)
 }
 
-
 func (uc EventsController) RegisterMember(resp http.ResponseWriter, req *http.Request) {
 
 	change := mgo.Change{
-		Update: bson.M{"$inc": bson.M{"attending_count": 1}},
+		Update: bson.M{"$inc": bson.M{"places_left": -1}},
 	}
 
 	event := models.Event{}
 
-	info, err := uc.session.DB("bsu_api").C("events").Find(
-		bson.M{
-			"_id" : bson.ObjectIdHex(mux.Vars(req)["event_id"])}).Apply(change, &event)
+	//	info, err := uc.session.DB("bsu_api").C("events").Find(
+	//		bson.M{
+	//			"_id" : bson.ObjectIdHex(mux.Vars(req)["event_id"])}).Apply(change, &event)
 
-	log.Print(event.AttendingCount)
+	info, err := uc.session.DB("bsu_api").C("test").Find(
+		bson.M{
+			"_id" : bson.ObjectIdHex(mux.Vars(req)["event_id"]), "places_left": bson.M{"$gt": 0 }}).Apply(change, &event)
+
+	//	user := models.User{}
+	//	json.NewDecoder(req.Body).Decode(&user)
+	//	user.Id = bson.NewObjectId()
+	//	uc.session.DB("bsu_api").C("test").Insert(user)
 
 	if err != nil {
 		resp.WriteHeader(404)
 		return
 	}
 
-	fmt.Fprintf(resp, "<h1>Attend on event id = %s</h1>", info)
+	fmt.Fprintf(resp, "%s", info)
 }
